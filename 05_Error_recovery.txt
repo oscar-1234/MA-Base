@@ -1,0 +1,32 @@
+1) State management: Come gestire lo stato di un agente che deve sopravvivere a decine di step senza perdersi - questo riguarda la capacità di mantenere coerenza e contesto durante operazioni complesse e lunghe
+2) Planning: Come implementare una strategia che non collassi dopo il terzo tool call - si riferisce alla difficoltà di creare agenti che possano pianificare sequenze di azioni complesse senza degradare le prestazioni
+3) Multi-agent orchestration: Come far dialogare più agenti LLM tra loro e i pezzi di centro loop infiniti - affronta il problema della coordinazione tra agenti multipli evitando loop infiniti e conflitti
+4) Long-term memory: Come gestire il contesto a lungo termine senza esplodere di token e di costi - la sfida di mantenere memoria persistente in modo efficiente dal punto di vista computazionale ed economico
+5) Error recovery: Cosa succede quando un agente fallisce a metà di un workflow complesso - riguarda la resilienza dei sistemi agentici e la capacità di recuperare da errori senza compromettere l'intero processo
+
+La ricerca SOTA (AgentErrorTaxonomy, 2025) classifica i fallimenti in 5 categorie:
+| Tipo           | Esempio concreto nel tuo sistema                    |
+| -------------- | --------------------------------------------------- |
+| Infrastructure | OpenAI timeout, Mem0 down, rate limit               |
+| Tool           | get_weather lancia exception, risposta malformata   |
+| Memory         | STM inconsistente, LTM save fallita silenziosamente |
+| Planning       | Agente chiama weather_agent in loop infinito        |
+| Semantic       | LLM risponde fuori schema, JSON non parsabile       |
+
+
+
+Step Preventivi:
+A) Layer 1: Il system prompt istruisce l'LLM a recuperare.
+
+B) Layer 2: Protegge a livello Python dove l'LLM non arriva), per esempio timeout di rete, rate limit, eccezioni hardware.
+
+| Tipo errore      | HTTP Code | Retry?               |
+| ---------------- | --------- | -------------------- |
+| Rate limit       | 429       | ✅ Sì (attendi)       |
+| Server error     | 5xx       | ✅ Sì                 |
+| Timeout          | -         | ✅ Sì                 |
+| Auth error       | 401       | ❌ No (è permanente)  |
+| Bad input        | 400       | ❌ No (retry inutile) |
+| Tool non trovato | -         | ❌ No                 |
+
+Costruzione Wrapper per chiamate che potrebbero dar problemi (rety per tool call, per gestione OpenAI errors etc). 

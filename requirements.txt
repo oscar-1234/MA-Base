@@ -3,6 +3,7 @@ datapizza-ai-clients-google
 datapizza-ai-clients-openai-like
 datapizza-ai-tools-duckduckgo
 openai==2.9.0
+tenacity
 python-dotenv
 pydantic
 mem0ai
