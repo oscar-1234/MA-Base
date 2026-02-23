@@ -1,0 +1,168 @@
+Creazione della struttura del progetto
+
+1) Crea la directory principale del progetto
+
+mkdir Datapizza-ai_training
+cd Datapizza-ai_training
+
+2) Crea la struttura delle directory
+
+mkdir app\data, src\data, src\__pycache__, venv
+
+3) Crea i file Python necessari
+
+New-Item -Path "app\main.py" -ItemType File
+New-Item -Path "src\__init__.py" -ItemType File
+New-Item -Path "src\agents.py" -ItemType File
+New-Item -Path "src\config.py" -ItemType File
+New-Item -Path "src\database.py" -ItemType File
+New-Item -Path "src\models.py" -ItemType File
+New-Item -Path "src\tools.py" -ItemType File
+New-Item -Path "src\utils.py" -ItemType File
+
+4) Crea i file di configurazione
+
+New-Item -Path ".env" -ItemType File
+New-Item -Path ".env.example" -ItemType File
+New-Item -Path ".gitignore" -ItemType File
+New-Item -Path "LICENSE" -ItemType File
+New-Item -Path "README.md" -ItemType File
+New-Item -Path "requirements.txt" -ItemType File
+New-Item -Path "run.bat" -ItemType File
+New-Item -Path "setup.bat" -ItemType File
+
+5) copia manualmente da altri progetti i file
+.env
+.env.example
+.gitignore
+LICENSE
+
+6) Inizializza il repository Git
+
+git init
+
+7) Crea il repository su GitHub
+
+Vai su github.com e accedi
+
+Clicca sul pulsante "+" in alto a destra e seleziona "New repository"
+
+Nome repository: Datapizza-ai_training
+
+Configurazione:
+- impostare su "Privato"
+- lasciare altri vaori di default (es. non inizializzare con README)
+
+Clicca "Create repository"
+
+8) Collega il repository locale a GitHub
+
+git remote add origin https://github.com/oscar-1234/Datapizza-ai_training.git
+git branch -M main
+
+git add .
+git commit -m "Initial commit: Project structure"
+
+git push -u origin main
+
+9) una volta creato il codice, lanciare
+.\setup.bat per la creazione ambiente virtuale
+
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+10) lancio venv se non già attivo
+Nota: modificare il path opportunamente con la cartella del progetto
+
+& c:/Python/Python312/MyProjects/Datapizza-ai_training/venv/Scripts/Activate.ps1
+
+11) eseguire File
+python main_1_8.py
+______________________________________________________________________
+
+11)eliminare venv per simulare ricreazione totale
+Elimina manualmente la cartella venv (tasto destro → Elimina)
+
+
+11) creare branch
+
+
+12) dopo merge su github
+- Spostati sul ramo principale:
+
+git checkout main
+
+- Scarica tutti gli aggiornamenti (compresi i merge che hai fatto online):
+
+git pull origin main
+
+
+13) cancello branch
+0. committo branch
+
+1. Spostati prima su un altro ramo (es. main)
+Non puoi cancellare il ramo su cui sei seduto.
+git checkout main
+
+2. Cancellalo dal tuo computer (Locale)
+Usa la D maiuscola (che sta per "Force Delete"). Se usi la d minuscola, Git ti darà errore.
+
+git branch -D nome-del-branch-inutile
+
+3. Cancellalo da GitHub (Remoto)
+Se avevi già caricato questo ramo online, devi rimuoverlo anche da lì, altrimenti continuerai a vederlo.
+git push origin --delete nome-del-branch-inutile
+
+14) Attivare e disattivare ambiente virtuale
+c:/Python/Python312/MyProjects/F-AI_Test_Inst/venv/Scripts/Activate.ps1
+
+deactivate
+
+15)ho fatto modifica su github, come lascarico in locale?
+Assicurati di essere sul ramo giusto (di solito main):
+git checkout main
+
+Scarica e unisci le modifiche:
+git pull origin main
+
+16)"Squash" di tutta la history o creazione di un "Orphan Branch".
+
+Ecco il metodo più sicuro e pulito per farlo, che ti permette di avere un unico commit iniziale ("Initial commit" o "First publication") con tutto il codice attuale funzionante.
+
+Procedura Passo-Passo (Metodo Orphan Branch)
+Questo metodo crea un ramo completamente nuovo e scollegato dalla storia precedente, ma con tutti i tuoi file attuali già pronti.
+
+Assicurati di essere sul tuo ramo principale (es. main) e di avere tutto pulito:
+
+bash
+git checkout main
+git pull origin main
+Crea un ramo "orfano" (senza genitori/storia):
+
+bash
+git checkout --orphan nuovo-inizio
+A questo punto, se fai git log, vedrai che non c'è nessuna storia. Ma se guardi i file nella cartella, ci sono tutti!
+
+Prepara tutti i file per il primo commit:
+
+bash
+git add .
+Fai il "primo" commit:
+
+bash
+git commit -m "Pubblicazione iniziale del progetto"
+Ora devi sostituire il vecchio main con questo nuovo
+Attenzione: questa operazione sovrascrive la storia sul server (GitHub). Se qualcun altro sta lavorando sul progetto, gli creerai problemi (dovranno riscaricare tutto). Se sei solo tu, vai tranquillo.
+
+Cancella il vecchio ramo main (locale):
+
+bash
+git branch -D main
+Rinomina il ramo corrente in main:
+
+bash
+git branch -m main
+Forza l'aggiornamento su GitHub:
+Questo è il passaggio cruciale che "distrugge" la vecchia storia sul server e mette quella nuova pulita.
+
+bash
+git push -f origin main

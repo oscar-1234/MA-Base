@@ -1,0 +1,44 @@
+1) Per avviare il server in background 
+
+ollama serve
+
+Per forzare solo CPU e saltare la scoperta GPU, imposta la variabile d'ambiente prima del comando:
+Nota: $env:OLLAMA_LLM_LIBRARY="cpu"; ollama serve
+
+il terminale rimane in ascolto, aprire altro terminale se necessario
+
+--> Per stopparlo premere Ctrl+C
+
+2) Controlla se up and running
+
+http://localhost:11434 
+
+(deve mostrare "Ollama is running")
+
+3) Controlla lo stato
+
+ollama --version
+
+4) Per verificare i modelli disponibili
+
+ollama list
+
+5) Per avviare un modello interattivo (per chat interattiva)
+
+ollama run <nome_modello>
+esempio ollama run llama3 oppure ollama run gemma2:2b
+
+Nota: questo scarica il modello se non presente e avvia una chat nel terminale.
+
+*Digita /bye per uscire
+
+6) Per scaricare un modello
+
+ollama pull <nome_modello>
+esempio ollama pull qwen3:4b
+
+
+
+
+
+
