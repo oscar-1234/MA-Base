@@ -21,7 +21,7 @@ def create_agents(memory: Memory) -> tuple[Agent, Agent]:
         system_prompt=WEATHER_SYSTEM_PROMPT,
         tools=[get_weather],
         memory=memory,
-        max_steps=10,
+        max_steps=5,
     )
     orchestrator.can_call(weather)
     return orchestrator, weather

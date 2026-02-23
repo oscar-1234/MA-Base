@@ -4,18 +4,51 @@ import asyncio
 from datapizza.memory import Memory
 from datapizza.type import ROLE, TextBlock
 
-#from multi_agent_chat.config import STM_MAX_TURNS
-#from multi_agent_chat.prompts.system_prompts import BASE_ORCHESTRATOR_PROMPT
-#from multi_agent_chat.memory.stm import prune_memory
-#from multi_agent_chat.memory.ltm import get_ltm_context_async, save_final_response_to_ltm_async
-#from multi_agent_chat.agents.setup import create_agents
-
 from ..config import STM_MAX_TURNS
 from ..memory.stm import prune_memory
 from ..memory.ltm import get_ltm_context_async, save_final_response_to_ltm_async
 from ..agents.setup import create_agents
 from ..prompts.system_prompts import BASE_ORCHESTRATOR_PROMPT
 
+
+### MONKEY PATCH
+from openai import RateLimitError, APIConnectionError, AuthenticationError
+import time
+from datapizza.agents import Agent
+
+original_stream_invoke = Agent.stream_invoke
+
+def resilient_stream_invoke(self, query):
+    try:
+        yield from original_stream_invoke(self, query)
+    except AuthenticationError as e:
+        print(f"[API] ❌ Auth failed (fatal): {e}")
+        raise RuntimeError("OpenAI authentication failed. Check API key.") from None
+    except RateLimitError as e:
+        print(f"[API] ⏳ Rate limit → 60s wait")
+        time.sleep(60)
+        yield from resilient_stream_invoke(self, query)
+    except APIConnectionError as e:
+        print(f"[API] 🌐 Connection retrying...")
+        for i in range(3):
+            time.sleep(2 ** i)
+            try:
+                yield from original_stream_invoke(self, query)
+                return
+            except APIConnectionError:
+                continue
+        
+        # Fallback semplice
+        class FallbackStep:
+            def __init__(self, content):
+                self.content = [TextBlock(content=content)]
+                self.index = 1
+                self.tools_used = []
+        
+        print("[API] ⚠️ All retries failed → fallback")
+        yield FallbackStep("Connection issues. Please try again.")
+
+Agent.stream_invoke = resilient_stream_invoke
 
 
 # Istanze condivise di sessione
@@ -58,7 +91,7 @@ def chat_turn(user_query: str) -> None:
                 memory.add_to_last_turn(TextBlock(content=f"TEXT CONTENT: {block.content}"))
 
         # Pruning intra-run ogni 3 step
-        if step.index % 3 == 0:
+        if step.index % 2 == 0:
             prune_memory(memory, max_turns=STM_MAX_TURNS)
 
     # 4. Salva ultimo turno in LTM

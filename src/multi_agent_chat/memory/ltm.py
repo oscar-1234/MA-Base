@@ -66,17 +66,33 @@ def datapizza_to_mem0(
             mem0_messages.append({"role": role, "content": " ".join(text_parts)})
     return mem0_messages
 
-
-def save_to_ltm(turns: list[dict], user_id: str = USER_ID) -> None:
+def save_to_ltm(turns: list[dict], user_id: str = USER_ID) -> bool:
     """Salva in LTM i turni in scadenza."""
-    mem0_messages = datapizza_to_mem0(turns)
-    if not mem0_messages:
-        print("[LTM] Nessun contenuto da salvare.")
-        return
-    print(f"\n[LTM] Saving {len(mem0_messages)} messages...")
-    result = m.add(mem0_messages, user_id=user_id)
-    print(f"[LTM] ✅ ADD: {result}")
+    try:
+#       Test fallimneto update LTM
+        raise ConnectionError("Simulated LTM down")
+        mem0_messages = datapizza_to_mem0(turns)
+        if not mem0_messages:
+            print("[LTM] Nessun contenuto da salvare.")
+            return True
+        print(f"\n[LTM] Saving {len(mem0_messages)} messages...")
+        result = m.add(mem0_messages, user_id=user_id)
+        print(f"[LTM] ✅ ADD: {result}")
+        return True
 
+    except Exception as e:
+        print(f"[LTM] ⚠️ Save failed (silent): {e}")
+        return False
+
+async def save_final_response_to_ltm_async(user_query: str, memory) -> None:
+    data = json.loads(memory.json_dumps())
+    recent_turns = []
+    for turn in reversed(data):
+        recent_turns = [turn] + recent_turns
+        if turn["role"] == "user":
+            break
+    if len(recent_turns) >= 2:
+        save_to_ltm(recent_turns)
 
 async def get_ltm_context_async(
     query: str, user_id: str = USER_ID, top_k: int = 3
@@ -101,19 +117,7 @@ async def get_ltm_context_async(
     print(f"\n[LTM] Inject:\n{context}")
     return context
 
-
-async def save_final_response_to_ltm_async(user_query: str, memory) -> None:
-    data = json.loads(memory.json_dumps())
-    recent_turns = []
-    for turn in reversed(data):
-        recent_turns = [turn] + recent_turns
-        if turn["role"] == "user":
-            break
-    if len(recent_turns) >= 2:
-        save_to_ltm(recent_turns)
-
-
-def close_mem01() -> None:
+def close_mem0() -> None:
     """Cleanup mem0."""
     try:
         if hasattr(m, "_vector_store") and m._vector_store:
@@ -123,7 +127,7 @@ def close_mem01() -> None:
     gc.collect()
     print("[LTM] Cleanup completato.")
 
-def close_mem0() -> None:
+def close_mem01() -> None:
     """Cleanup mem0 senza warning durante shutdown."""
     try:
         if hasattr(m, '_vector_store') and m._vector_store:

@@ -26,7 +26,10 @@ def prune_memory(memory: Memory, max_turns: int = 3) -> None:
 
     expiring_flat = [msg for turn in turns[:-max_turns] for msg in turn]
     if expiring_flat:
-        save_to_ltm(expiring_flat)
+        success = save_to_ltm(expiring_flat)
+        if not success:
+            print(f"\n[LTM] No pruning STM - LTM error")
+            return      #errore in aggiornamento LTM, restituisco STM intatta
 
     window_flat = [msg for turn in turns[-max_turns:] for msg in turn]
     print(f"=== POST PRUNE: {len(window_flat)} messaggi da {len(turns[-max_turns:])} turn ===")
