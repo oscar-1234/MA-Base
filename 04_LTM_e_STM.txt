@@ -36,27 +36,3 @@ stream_invoke()         → multi-agent execution
 save_final_response_to_ltm_async() → salva fatti del turno corrente
     ↓
 OUTPUT risposta personalizzata
-
-
-
-
-
-I'm Oscar and I live in Milan. What's the weather in the city?
-
-What's the weather in Rome? 
-
-And what about your cat?
-
-Sorry, I have a cat named Jerry
-
-What's my name?
-
-Where I live?
-
-I like pizza, and you?
-
-What food do I like?
-
-Weather?
-
-Weather in my city?

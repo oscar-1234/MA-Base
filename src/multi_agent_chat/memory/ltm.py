@@ -101,14 +101,15 @@ async def get_ltm_context_async(
     memories = results.get("results", [])
     print("\n=== LTM CONTEXT (PRE INJECT) ===")
     if not memories:
-        print("[LTM] Nessun fatto rilevante trovato.")
-        return ""
+        context = "No relevant facts found."
+        print("[LTM] No relevant facts found.")
+        return context
     for i, mem in enumerate(memories, 1):
         print(f" [{i}] {mem['memory']} (score: {mem.get('score', 'n/a')})")
     context = (
         "USER PROFILE - VERIFIED DATA:\n"
         + " | ".join(mem["memory"] for mem in memories)
-        + "\n\nINSTRUCTIONS:\n"
+        + "\n\nLTM INSTRUCTIONS:\n"
         "1. Treat these facts as absolute truth\n"
         "2. Always use this information when relevant to the conversation\n"
         "3. Answer directly from the data above without asking the user to repeat it\n"

@@ -3,12 +3,13 @@ import asyncio
 
 from datapizza.memory import Memory
 from datapizza.type import ROLE, TextBlock
+from datapizza.agents import Agent, StepResult
 
 from ..config import STM_MAX_TURNS
 from ..memory.stm import prune_memory
 from ..memory.ltm import get_ltm_context_async, save_final_response_to_ltm_async
 from ..agents.setup import create_agents
-from ..prompts.system_prompts import ORCHESTRATOR_PLANNER_PROMPT
+from ..prompts.system_prompts import ORCHESTRATOR_PROMPT
 
 
 ### MONKEY PATCH
@@ -66,33 +67,45 @@ def chat_turn(user_query: str) -> None:
     # 2. LTM inject nel system prompt
     ltm_context = asyncio.run(get_ltm_context_async(user_query))
     if ltm_context:
-        full_prompt = ORCHESTRATOR_PLANNER_PROMPT.format(ltm_context=ltm_context)
+        full_prompt = ORCHESTRATOR_PROMPT.format(ltm_context=ltm_context)
     else:
-        full_prompt = ORCHESTRATOR_PLANNER_PROMPT
+        full_prompt = ORCHESTRATOR_PROMPT
+
+    print(f"ORCHESTRATOR FULL PROMPT \n {full_prompt}")
 
     memory.add_turn(TextBlock(content=user_query), role=ROLE.USER)
 
     # 3. Invoke con streaming
     for step in orchestrator_agent.stream_invoke(user_query):
-        agent_name = (
-            f"{orchestrator_agent.name} -> {step.tools_used[0].name}"
-            if step.tools_used else orchestrator_agent.name
-        )
-        memory.add_turn(
-            TextBlock(content=f"STEP: {step.index} | AGENT: {agent_name}"),
-            role=ROLE.ASSISTANT,
-        )
-        for block in step.content:
-            if hasattr(block, "arguments"):
-                memory.add_to_last_turn(TextBlock(content=f"TOOL CALL: {block.name} ARGS: {block.arguments}"))
-            elif hasattr(block, "result"):
-                memory.add_to_last_turn(TextBlock(content=f"TOOL RESULT: {block.result}"))
-            elif hasattr(block, "content"):
-                memory.add_to_last_turn(TextBlock(content=f"TEXT CONTENT: {block.content}"))
+        if isinstance(step, StepResult):
+            agent_name = (
+                f"{orchestrator_agent.name} -> {step.tools_used[0].name}"
+                if step.tools_used else orchestrator_agent.name
+            )
+            memory.add_turn(
+                TextBlock(content=f"STEP: {step.index} | AGENT: {agent_name}"),
+                role=ROLE.ASSISTANT,
+            )
+            for block in step.content:
+                if hasattr(block, "arguments"):
+                    memory.add_to_last_turn(TextBlock(content=f"TOOL CALL: {block.name} ARGS: {block.arguments}"))
+                elif hasattr(block, "result"):
+                    memory.add_to_last_turn(TextBlock(content=f"TOOL RESULT: {block.result}"))
+                elif hasattr(block, "content"):
+                    memory.add_to_last_turn(TextBlock(content=f"TEXT CONTENT: {block.content}"))
 
-        # Pruning intra-run ogni 3 step
-        if step.index % 2 == 0:
-            prune_memory(memory, max_turns=STM_MAX_TURNS)
+            # Pruning intra-run ogni 3 step
+            if step.index % 2 == 0:
+                prune_memory(memory, max_turns=STM_MAX_TURNS)
+
+        else:
+            # È un Plan (o altro tipo sconosciuto) — ispezioniamo cosa contiene
+            print(f"\n=== PLAN OBJECT ===")
+            print(f"Type: {type(step).__name__}")
+            print(f"Attrs: {vars(step)}")  # tutti gli attributi e valori
+
+            step_info = f"STEP: {type(step).__name__} | AGENT: {orchestrator_agent.name} | Attrs: {vars(step)}"
+            memory.add_turn(TextBlock(content=step_info), role=ROLE.ASSISTANT)
 
     # 4. Salva ultimo turno in LTM
     print("\n💾 SAVING TO LTM...")

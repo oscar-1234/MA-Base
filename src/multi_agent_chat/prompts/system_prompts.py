@@ -1,4 +1,4 @@
-ORCHESTRATOR_PLANNER_PROMPT = """
+ORCHESTRATOR_PROMPT = """
 <role>
 You are the ORCHESTRATOR: think THEN delegate to specialists.
 </role>
