@@ -8,7 +8,7 @@ from ..config import STM_MAX_TURNS
 from ..memory.stm import prune_memory
 from ..memory.ltm import get_ltm_context_async, save_final_response_to_ltm_async
 from ..agents.setup import create_agents
-from ..prompts.system_prompts import BASE_ORCHESTRATOR_PROMPT
+from ..prompts.system_prompts import ORCHESTRATOR_PLANNER_PROMPT
 
 
 ### MONKEY PATCH
@@ -65,10 +65,10 @@ def chat_turn(user_query: str) -> None:
 
     # 2. LTM inject nel system prompt
     ltm_context = asyncio.run(get_ltm_context_async(user_query))
-    orchestrator_agent.system_prompt = (
-        f"{BASE_ORCHESTRATOR_PROMPT}\n\n{ltm_context}" if ltm_context
-        else BASE_ORCHESTRATOR_PROMPT
-    )
+    if ltm_context:
+        full_prompt = ORCHESTRATOR_PLANNER_PROMPT.format(ltm_context=ltm_context)
+    else:
+        full_prompt = ORCHESTRATOR_PLANNER_PROMPT
 
     memory.add_turn(TextBlock(content=user_query), role=ROLE.USER)
 

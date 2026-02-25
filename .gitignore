@@ -22,6 +22,7 @@ wheels/
 test/
 tests/
 demo/
+gitingest/
 
 # Virtual environments
 venv/

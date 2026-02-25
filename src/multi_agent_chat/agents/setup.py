@@ -2,7 +2,7 @@ from datapizza.agents import Agent
 from datapizza.memory import Memory
 
 from ..agents.client import client
-from ..prompts.system_prompts import BASE_ORCHESTRATOR_PROMPT, WEATHER_SYSTEM_PROMPT
+from ..prompts.system_prompts import ORCHESTRATOR_PLANNER_PROMPT, WEATHER_SYSTEM_PROMPT
 from ..tools.weather import get_weather
 
 
@@ -11,8 +11,10 @@ def create_agents(memory: Memory) -> tuple[Agent, Agent]:
     orchestrator = Agent(
         name="orchestrator_agent",
         client=client,
-        system_prompt=BASE_ORCHESTRATOR_PROMPT,
+        system_prompt=ORCHESTRATOR_PLANNER_PROMPT,
         memory=memory,
+#        planning_interval=3,
+        stateless=False,
         max_steps=10,
     )
     weather = Agent(
@@ -23,5 +25,7 @@ def create_agents(memory: Memory) -> tuple[Agent, Agent]:
         memory=memory,
         max_steps=5,
     )
-    orchestrator.can_call(weather)
+
+    orchestrator.can_call([weather])
+
     return orchestrator, weather

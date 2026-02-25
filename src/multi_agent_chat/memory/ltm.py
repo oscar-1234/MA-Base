@@ -69,8 +69,8 @@ def datapizza_to_mem0(
 def save_to_ltm(turns: list[dict], user_id: str = USER_ID) -> bool:
     """Salva in LTM i turni in scadenza."""
     try:
-#       Test fallimneto update LTM
-        raise ConnectionError("Simulated LTM down")
+##       Test fallimneto update LTM
+#        raise ConnectionError("Simulated LTM down")
         mem0_messages = datapizza_to_mem0(turns)
         if not mem0_messages:
             print("[LTM] Nessun contenuto da salvare.")
