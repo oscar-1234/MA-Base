@@ -74,7 +74,10 @@ app/data/agent_communication.jsonl
 #File guida
 01_How_to_start.txt
 02_Ollama_how_to_start.txt
-99_Git_e_Github.txt
+99_Git_e_Github.md
 ReAct.txt
-"TOT Tree-of-Thought.txt"
+TOT_Tree-of-Thought.txt
 main_5_8_F_bis.py
+04_LTM_e_STM.txt
+05_Error_recovery.txt
+03_Temi.txt
