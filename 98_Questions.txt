@@ -1,5 +1,9 @@
 I'm Oscar and I live in Milan. What's the weather in the city?
 
+I have to go from my city to Rome tomorrow morning leaving at 8:00. Can you book a transfer?
+
+I have to go from my Milan to Rome tomorrow morning leaving at 8:00. Can you book a transfer?
+
 What's the weather in Rome? 
 
 And what about your cat?
@@ -17,3 +21,5 @@ What food do I like?
 Weather?
 
 Weather in my city?
+
+What's my pet name?
