@@ -9,8 +9,9 @@ from ..config import STM_MAX_TURNS
 from ..memory.stm import prune_memory
 from ..memory.ltm import get_ltm_context_async, save_final_response_to_ltm_async
 from ..agents.setup import create_agents
+from ..chat.classifier import classify_user_intent
 from ..prompts.system_prompts import ORCHESTRATOR_PROMPT
-
+from ..prompts.procedural_memory import PROC_MEMORY
 
 ### MONKEY PATCH
 from openai import RateLimitError, APIConnectionError, AuthenticationError
@@ -54,7 +55,7 @@ Agent.stream_invoke = resilient_stream_invoke
 
 # Istanze condivise di sessione
 memory = Memory()
-orchestrator_agent, weather_agent = create_agents(memory)
+orchestrator_agent, weather_agent, parse_weather, trasfer_agent = create_agents(memory)
 
 
 def chat_turn(user_query: str) -> None:
@@ -66,12 +67,25 @@ def chat_turn(user_query: str) -> None:
 
     # 2. LTM inject nel system prompt
     ltm_context = asyncio.run(get_ltm_context_async(user_query))
-    if ltm_context:
-        full_prompt = ORCHESTRATOR_PROMPT.format(ltm_context=ltm_context)
-    else:
-        full_prompt = ORCHESTRATOR_PROMPT
+#    if ltm_context:
+#        full_prompt = ORCHESTRATOR_PROMPT.format(ltm_context=ltm_context)
+#    else:
+#        full_prompt = ORCHESTRATOR_PROMPT
 
-    print(f"ORCHESTRATOR FULL PROMPT \n {full_prompt}")
+#    stm_session = memory.json_dumps()
+    task = classify_user_intent(user_query)
+#    task = classify_user_intent_2(user_query, ltm_context, stm_session)
+
+    # Inject procedural memory
+    task_config = PROC_MEMORY[task]
+    
+    full_prompt = ORCHESTRATOR_PROMPT.format(
+        ltm_context=ltm_context,
+        procedural_memory=task_config["instruction"],
+        available_agents=task_config["available_agents"]
+    )
+
+    print(f"\n=== ORCHESTRATOR FULL PROMPT  === \n {full_prompt}")
 
     memory.add_turn(TextBlock(content=user_query), role=ROLE.USER)
 

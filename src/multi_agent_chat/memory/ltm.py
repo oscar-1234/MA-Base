@@ -111,7 +111,7 @@ async def get_ltm_context_async(
         + " | ".join(mem["memory"] for mem in memories)
         + "\n\nLTM INSTRUCTIONS:\n"
         "1. Treat these facts as absolute truth\n"
-        "2. Always use this information when relevant to the conversation\n"
+        "2. ALWAYS use this information WHEN RELEVANT to the conversation\n"
         "3. Answer directly from the data above without asking the user to repeat it\n"
         '4. NEVER say "I don\'t know" if the answer is in the data above'
     )
