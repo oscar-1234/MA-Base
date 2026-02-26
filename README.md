@@ -1,4 +1,4 @@
-#🤖 Multi-Agent Memory Management: A Case Study on datapizza-ai Framework 
+# 🤖 Multi-Agent Memory Management: A Case Study on datapizza-ai Framework 
 ## A Case Study on datapizza-ai Framework
 
 ## 🎯 Panoramica
